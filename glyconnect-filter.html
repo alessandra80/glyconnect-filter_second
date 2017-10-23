@@ -1,0 +1,760 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-collapse/iron-collapse.html">
+<link rel="import" href="../paper-tabs/paper-tabs.html">
+<link rel="import" href="../iron-pages/iron-pages.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-styles/element-styles/paper-material-styles.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../vaadin-upload/vaadin-upload.html">
+<link rel="import" href="../iron-list/iron-list.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../paper-slider/paper-slider.html">
+<link rel="import" href="../iron-autogrow-textarea/iron-autogrow-textarea.html">
+<link rel="import" href="../glycosetta-stone/glycosetta-stone.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+<!--
+`glyconnect-filter`
+This element provides filter box in glyconnect
+@demo demo/index.html
+-->
+<!-- file_format_morten=[Hex]5 [HexNAc]5 [dHex]2 [NeuAc]3 -->
+<dom-module id="glyconnect-filter">
+    <template>
+        <style is="custom-style" include="iron-flex iron-flex-alignment paper-material-styles"></style>
+        <style>
+            :host {
+                display: block;
+            }
+            iron-icon[disabled]{
+                display: none;
+            }
+            .enzymeList{
+                padding: 5px;
+                @apply(--layout-horizontal);
+                @apply(--layout-wrap);
+                min-width: 200px;
+                align-content: center;
+            }
+            .enzymeSelected{
+                padding: 5px;
+                @apply(--layout-horizontal);
+                @apply(--layout-wrap);
+                min-height: 100px;
+                align-items: right;
+            }
+            paper-button.indigo {
+                background-color: var(--paper-indigo-500);
+                color: white;
+                --paper-button-raised-keyboard-focus: {
+                    color: white !important;
+                };
+            }
+            paper-button.filterToggleButton {
+                width: 100%;
+            }
+            paper-button.updateButton {
+                margin: 13px;
+                font-size: 16px;
+            }
+            .glycanFilterHeader {
+                font-size: 16px;
+                font-weight: 500;
+                line-height: 25px;
+            }
+            .card {
+                background-color: #cc3300;
+                font-size: 16px;
+                /*font-weight: 400;*/
+                padding: 15px 15px 15px 15px;
+                /*box-sizing: border-box;*/
+                margin: 10px;
+                flex: 0 0 auto;
+                color: white;
+            }
+            paper-tab:not(:last-child) {
+                border-right: solid;
+                border-color: #757575 ;
+                border-width: 1px;
+            }
+            paper-tab.iron-selected {
+                background-color: var(--paper-indigo-500);
+                color: white;
+            }
+            paper-tabs{
+              --paper-tabs-selection-bar-color: #eee;
+              background-color: #eeeeee;
+              color: black;
+              font-size: 20px;
+              font-weight: 600;
+              border-radius: 5px;
+              margin: 20px;
+              box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+            }
+            .materialCard {
+                margin: 20px;
+                background: #eeeeee;
+                @apply --paper-material-elevation-2;
+            }
+            paper-item.fancy {
+              --paper-item-focused: {
+                background: var(--paper-amber-500);
+              };
+              --paper-item-focused-before: {
+                opacity: 0;
+              };
+            }
+            .doubleRangeBox{
+                width: 300px;
+                margin: 10px 20px 10px 20px;
+            }
+            #rangeBox {
+                padding: 30px 20px 20px 20px;
+            }
+            #clearIcon {
+              margin: 40px 20px 20px 20px;
+              float: right;
+            }
+            vaadin-upload.thick-border {
+                padding: 14px;
+                /*background: #eee;*/
+                /*border-radius: 0;*/
+            }
+            .textarea{
+              /*background-color: #E6E6E6;*/
+              width: 520px;
+              font-size: 14px;
+              border-color: var(--paper-indigo-500);
+              padding: 30px 20px 20px 20px;
+              margin: 40px 20px 20px 20px;
+              border-radius: 5px;
+            }
+            #buttons {
+                width: 20%;
+                display: inline-block;
+            }
+            #selection {
+                width: 70%;
+                display: inline-block;
+            }
+        </style>
+        <iron-ajax
+                id="ajaxDictionary"
+                handle-as="json"
+                method="GET"
+                on-response="handleResponse"
+        ></iron-ajax>
+        <iron-ajax
+                id="proteinDictionary"
+                handle-as="json"
+                method="GET"
+                on-response="handleProtein"
+        ></iron-ajax>
+          <app-toolbar id="buttons" class="horizontal center-justified">
+              <paper-button class="indigo updateButton filterToggleButton" raised on-tap="_toggleProtein">Protein</paper-button><br>
+              <paper-button class="indigo updateButton filterToggleButton" raised on-tap="">Composition</paper-button>
+              <paper-button id="N" typeLink="" class="indigo updateButton filterToggleButton" raised on-tap="populate">N-linked glycans</paper-button>
+              <paper-button id="O" typeLink="" class="indigo updateButton filterToggleButton" raised on-tap="populate">O-linked glycans</paper-button>
+              <paper-button id="Free" typeLink="" class="indigo updateButton filterToggleButton" raised on-tap="populate">Free glycans</paper-button>
+          </app-toolbar>
+          <app-toolbar id="selection" class="horizontal center-justified">
+            <div  id="chosen">
+              <div class="layout materialCard flex">
+                    <app-toolbar>
+                        <paper-icon-button disabled style="color: white" icon="icons:view-list"></paper-icon-button>
+                        <span class="title">{{linkIcon}}-Glycan</span>
+                    </app-toolbar>
+                    <div id="selected" class="enzymeSelected">
+                     </div>
+                    <div class="horizontal end-justified layout">
+                        <paper-button class="indigo updateButton" on-tap="selectedFeature">Search</paper-button>
+                        <paper-button typeLink="" class="indigo updateButton" on-tap="clearFilter">Clear</paper-button>
+                    </div>
+              </div>
+              <div class="layout vertical flex">
+                 <paper-tabs selected="{{selected}}" no-bar>
+                     <paper-tab>Cores</paper-tab>
+                     <paper-tab>Structural properties</paper-tab>
+                     <paper-tab>Determinants</paper-tab>
+                 </paper-tabs>
+                 <iron-pages selected="{{selected}}">
+                  <div class="layout materialCard flex">
+                       <template is="dom-repeat" items="{{core}}">
+                            <paper-button typeLink="" id={{idCreator(item.name)}} raised data-id$="{{item.class}}={{item.name}}" coreTypeN="{{item}}" class="card" style$="background-color:{{item.color}}" on-tap="createTag">{{item.name}}</paper-button>
+                       </template>
+                   </div>
+                   <div class="layout materialCard flex">
+                       <template is="dom-repeat" items="{{prop}}">
+                           <paper-button typeLink="" id="{{item.name}}" raised data-id$="{{item.class}}={{item.name}}" propN="{{item}}" class="card" style$="background-color:{{item.color}}" on-tap="createTag">{{item.name}}</paper-button>
+                       </template>
+                   </div>
+                   <div class="layout materialCard flex"><link rel="import" href="../iron-list/iron-list.html">
+                       <template is="dom-repeat" items="{{det}}">
+                           <paper-button typeLink="" id="{{idCreator(item.name)}}" raised data-id$="{{item.class}}={{item.name}}" detN="{{item}}" class="card" style$="background-color:{{item.color}}" on-tap="createTag">{{item.name}}</paper-button>
+                       </template>
+                   </div>
+               </iron-pages>
+             </div>
+           </div>
+           <div id="proteinSection">
+            <vaadin-combo-box typeLink="Protein" id="protDropDown" required label="Protein"></vaadin-combo-box>
+            <div>
+              <div class="layout materialCard flex">
+                <app-toolbar>
+                    <paper-icon-button disabled style="color: white" icon="icons:view-list"></paper-icon-button>
+                    <span class="title">Species</span>
+                </app-toolbar>
+                <div id="availableSpecies" class="enzymeSelected">
+                  <template is="dom-repeat" items="{{species}}">
+                       <paper-button typeLink="Protein" id="{{_getLabelSpecies(item)}}Prot" speciesButton="{{item}}" class="card" on-tap="checkHowmany">{{item}}</paper-button>
+                  </template>
+                </div>
+              </div>
+              <div id= "selectedSpecies" class="layout materialCard flex">
+                    <app-toolbar>
+                        <paper-icon-button disabled style="color: white" icon="icons:view-list"></paper-icon-button>
+                        <span class="title">Selected species</span>
+                    </app-toolbar>
+                    <div id="selectedProtein" class="enzymeSelected">
+                     </div>
+                    <div class="horizontal end-justified layout">
+                        <paper-button typeLink="Protein" class="indigo updateButton" on-tap="clearFilter">Clear</paper-button>
+                    </div>
+              </div>
+            </div>
+            <paper-button class="indigo updateButton" taxo="{{item}}" id="sendDataProt" raised on-tap="_searchProtein">Search</paper-button>
+          </div>
+        </app-toolbar>
+
+    </template>
+
+    <script>
+    /** @polymerElement */
+    class GlyconnectFilter extends Polymer.Element {
+      static get is() { return 'glyconnect-filter'; }
+      static get properties() {
+        return {
+          repos: {
+            type: Array
+          },
+          selected: {
+            type: String,
+            value: 0
+          },
+          filterOutput: {
+            type: Array,
+            reflectToAttribute: true,
+            notify: true
+          },
+          monosaccharides: {
+            type: Array,
+            value: ['Hex', 'HexNAc', 'dHex', 'NeuAc', 'NeuGc', 'Pen', 'S', 'P', 'Kdn', 'Kdo', 'HexA',  'Methyl', 'Acetyl', 'Other']
+          },
+          spareMonosac: {
+            type: Array,
+            value: ['S', 'P', 'Kdn', 'Kdo', 'HexA',  'Methyl', 'Acetyl', 'Other']
+          },
+          species: {
+            type: Array,
+          },
+          fromUp: {
+            type: Array,
+            notify: true,
+            reflectToAttribute: true
+          },
+          compositions: {
+              type: String
+          },
+          compoCopied: {
+              type: String
+          },
+          labels: {
+              type: Object,
+              value: {
+                  'Hex': 'Hex',
+                  'HexNAc': 'HexNAc',
+                  'dHex': 'dHex',
+                  'NeuAc': 'NeuAc',
+                  'NeuGc': 'NeuGc',
+                  'Pen': 'Pentose',
+                  'S': 'Sulphate',
+                  'P': 'Phosphate',
+                  'Kdn': 'Kdn',
+                  'Kdo': 'Kdo',
+                  'HexA': 'HexA',
+                  'Methyl' : 'Methyl',
+                  'Acetyl' : 'Acetyl',
+                  'Other': 'Other'
+              }
+          },
+          protSpecies: {
+              type: Object,
+          },
+          count: {
+              type: Array,
+          },
+          textFromFileOx: {
+              type: Array,
+          },
+          linkIcon: {
+            type: String,
+          },
+          jsonGlobalProperties: {
+              type: Object,
+              reflectToAttribute: true
+          },
+        };
+      }
+      constructor() {
+        super();
+      }
+      ready() {
+       super.ready();
+       Polymer.dom(this.root).querySelector('#chosen').hidden=true;
+       Polymer.dom(this.root).querySelector('#proteinSection').hidden=true;
+       Polymer.dom(this.root).querySelector('#selectedSpecies').hidden=true;
+       Polymer.dom(this.root).querySelector('#protDropDown').addEventListener('change', e => {this.printSP(e)});
+      }
+      attached () {
+          this.async(function(){this._setTogglesAndRSliders();},1);
+      }
+      openDialog() {
+        this.$.dialog.open();
+      }
+      connectedCallback (){
+        super.connectedCallback();
+        this.$.ajaxDictionary.url = this.resolveUrl('dictionary/jsonGlobalProperties.json');
+        this.$.ajaxDictionary.generateRequest();
+        this.$.proteinDictionary.url = this.resolveUrl('http://mendel.isb-sib.ch:8083/api/proteins');
+        this.$.proteinDictionary.generateRequest();
+        // this.$.compoDictionary.url = this.resolveUrl('http://mendel.isb-sib.ch:8083/api/glycosylations?composition?');
+        // this.$.compoDictionary.generateRequest();
+      }
+      handleResponse(data){
+        this.jsonGlobalProperties = data.detail.response;
+      }
+      populate(event) {
+        Polymer.dom(this.root).querySelector('#proteinSection').hidden=true;
+        this.clearFilter(event);
+        Polymer.dom(this.root).querySelector('#chosen').hidden=false;
+        this.linkIcon = event.target.id;
+        if(this.linkIcon === "N"){
+          this.core = this.jsonGlobalProperties['N-linked']['core'];
+          this.det = this.jsonGlobalProperties['N-linked']['det'];
+          this.prop = this.jsonGlobalProperties['N-linked']['prop'];
+        }else if (this.linkIcon === "O"){
+          this.core = this.jsonGlobalProperties['O-linked']['core'];
+          this.prop = this.jsonGlobalProperties['O-linked']['prop'];
+          this.det = this.jsonGlobalProperties['O-linked']['det'];
+        }else{
+          this.prop = this.jsonGlobalProperties['Non attached to proteins']['prop'];
+          this.det = this.jsonGlobalProperties['Non attached to proteins']['det'];
+          this.core = this.jsonGlobalProperties['Non attached to proteins']['core'];
+        }
+        // shadowRoot.querySelector("#"+monosaccharideId+"RangeMin").value
+      }
+      selectedFeature (){
+        var sel =  Polymer.dom(this.$.selected).querySelectorAll("paper-button");
+        var jsonParam = this.param(sel);
+        if( this.linkIcon === "Free"){
+         jsonParam.glycanType = this.linkIcon.toLowerCase();
+       }else{
+        jsonParam.glycanType = this.linkIcon.toLowerCase()+'-linked';
+      }
+        this.filterOutput = jsonParam;
+      }
+      clearFilter(event) {
+        var typeGlyco = event.target.getAttribute("typeLink");
+        var vr = this.shadowRoot.querySelector("#selected"+typeGlyco);
+        console.log(vr);
+        var toClear =  Polymer.dom(vr).querySelectorAll("paper-button");
+        for (var i = 0; i < toClear.length; i++) {
+          Polymer.dom(this.root).querySelector('paper-button[id='+toClear[i].id.replace("-clone",'')+']').hidden=false;
+          toClear[i].remove();
+        }
+      }
+      _toggleProtein () {
+        Polymer.dom(this.root).querySelector('#chosen').hidden=true;
+        Polymer.dom(this.root).querySelector('#proteinSection').hidden=false;
+        Polymer.dom(this.root).querySelector('#selectedSpecies').hidden=true;
+        Polymer.dom(this.root).querySelector('#protDropDown').value="";
+        this.species=[];
+        var selSpecies = Polymer.dom(this.root).querySelector("#selectedSpecies");
+        var toDelete =  Polymer.dom(selSpecies).querySelectorAll("paper-button");
+        for (var i = 0; i < toDelete.length; i++) {
+          toDelete[i].remove();
+        }
+        // this.$.glycanFilterProt.toggle();
+        // this.expandFold()
+      }
+      handleProtein(data){
+        var jsonProtein = data.detail.response;
+        var proteinList = [];
+        var proteinIds = [];
+        var nameSpecies = {};
+        var allSp = [];
+        for (var f =0; f < jsonProtein.length; f ++){
+          var protFeatures = jsonProtein[f];
+          var tax = protFeatures['taxonomy'];
+          allSp.push(tax);
+          name = protFeatures['name'].toLowerCase().replace(" ","");
+          if (nameSpecies.hasOwnProperty(name)){
+            nameSpecies[name].push(tax);
+          }else{
+            nameSpecies[name] = [tax];
+            proteinList.push(protFeatures['name']);
+          };
+          if (protFeatures['uniprots'] != undefined){
+            var accs = protFeatures['uniprots'];
+            var uniAcc;
+            for ( uniAcc in accs){
+              nameSpecies[accs[uniAcc]['uniprot_acc'].toLowerCase()]=[tax];
+              proteinIds.push(accs[uniAcc]['uniprot_acc']);
+            };
+          };
+        };
+        var result = { };
+        for(var i = 0; i < allSp.length; ++i) {
+            if(!result[allSp[i]])
+                result[allSp[i]] = 0;
+            ++result[allSp[i]];
+        };
+        this.count = result;
+        Array.prototype.push.apply(proteinList, proteinIds);
+        var combobox = Polymer.dom(this.root).querySelector('#protDropDown');
+        var elements = proteinList;//["Hydrogen", "Helium", "Silicon"];
+        combobox.items = elements;
+        this.protSpecies = nameSpecies;
+      }
+      printSP (e){
+        var val = Polymer.dom(this.root).querySelector('#protDropDown').value;
+        if(val != ''){
+          var speciesForChoice = this.protSpecies[val.toLowerCase().replace(" ","")];
+          var newSpecies = speciesForChoice.slice(0);
+        }else{
+          var newSpecies = [];
+        };
+        newSpecies.sort();
+        var newArray = [];
+        for (var s=0; s<newSpecies.length; s ++){
+          if (newArray.length == 0){
+            newArray.push(newSpecies[s])
+          }else{
+            if(newArray.includes(newSpecies[s])){
+              continue;
+            }else{
+              newArray.push(newSpecies[s]);
+            };
+          };
+        }
+        if(newArray.length >1){
+          newSpecies = this.orderSpecies(newSpecies);
+          Polymer.dom(this.root).querySelector('#selectedSpecies').hidden=false;
+          newArray.push('All');
+        }else{
+          Polymer.dom(this.root).querySelector('#selectedSpecies').hidden=true;
+        };
+        this.species = newArray;
+      }
+      orderSpecies(listOfSpecies){
+        var countSpecies = this.count;
+        var toOrder = {};
+        var sortable = [];
+        for(var w =0; w < listOfSpecies.length; w++){
+          toOrder[listOfSpecies[w]]=countSpecies[listOfSpecies[w]];
+        };
+        for (var speci in toOrder) {
+            sortable.push([speci, toOrder[speci]]);
+        };
+        sortable.sort(function(a, b) {
+            return b[1] -a[1];
+        });
+        var sorted = [];
+        for(var t =0; t < sortable.length; t++){
+          sorted.push(sortable[t][0]);
+        };
+        return sorted
+      }
+      _searchProtein(){
+        var myJson={};
+        var protein = Polymer.dom(this.root).querySelector('#protDropDown').value;
+        if (Polymer.dom(this.root).querySelector('#selectedSpecies').hidden==false){
+          var allTaxo = Polymer.dom(this.$.selectedProtein).querySelectorAll("paper-button");
+          for (var i = 0; i < allTaxo.length; i++) {
+            var x = allTaxo[i].id;
+            var y = x.replace('Prot-clone', '').replace('_', ' ');
+            if (y === 'All'){continue;}
+            if ('taxonomy' in myJson) {
+              myJson['taxonomy'].push(y);
+            } else {
+              myJson['taxonomy']=[y];
+            };
+          };
+        }
+        myJson['protein']=protein;
+        this.filterOutput = myJson;
+      }
+      uploadExperiment (event){
+          event.preventDefault();
+          var upload =  Polymer.dom(this.root).querySelector("#bUpload");
+          var file = event.detail.file;
+          var that = this;
+          var glycosetta = Polymer.dom(this.root).querySelector("#oxfordFile");
+          var reader = new FileReader();
+          reader.onload = function(event) {
+            upload.set(['files', upload.files.indexOf(file), 'status'], null);
+              var extension = file.name.slice(-4);
+              if(extension.toUpperCase() != ".TXT" ){
+                  upload.set(['files', upload.files.indexOf(file), 'error'], 'Extension Error. File must be TXT (i.e. example.txt).');
+                  return;
+              }
+              var text = event.target.result;
+              text = text.replace(/\r?\n|\r/g, '').replace(/, /g, ',').trim();
+              if(text.includes('Hex') === true){
+                that.fromUp = that.parseCompo(text.split(","));
+              }else{
+                var fromSetta = glycosetta.translate(text.split(","));
+                that.fromUp = fromSetta;
+              }
+            upload.set(['files', upload.files.indexOf(file), 'progress'], 100);
+            upload.set(['files', upload.files.indexOf(file), 'complete'], true);
+          };
+          reader.readAsText(file);
+      }
+      sendData(){
+        this.filterOutput = this.fromUp;
+      }
+      _getLabel (monosaccharide) {
+          return this.labels[monosaccharide];
+      }
+      _getLabelSpecies(first){
+        var second = first.replace(/ /g, "_");
+        var third = second.replace(/\./g, "");
+        return third
+      }
+
+      checkHowmany(event){
+        if(this.species.length >1){
+          this.createTag(event);
+        };
+      }
+      createTag(event) {
+       var typeTag = event.target.getAttribute("typeLink");
+       var list = Polymer.dom(this.root).querySelector("#selected"+typeTag);
+       var sourceEl = event.target;
+       var cloneEl = sourceEl.cloneNode(true);
+       event.target.hidden=true;
+       cloneEl.id=cloneEl.id+"-clone";
+       list.insertBefore(cloneEl, null);
+       cloneEl.addEventListener('tap', e => {this.destroyTag(e)});
+     }
+     createSelector(event) {
+       if(Polymer.dom(this.root).querySelector('#'+event.target.id+'toHide').hidden == true){
+         Polymer.dom(this.root).querySelector('#'+event.target.id+'toHide').hidden=false;
+       }else{
+         Polymer.dom(this.root).querySelector('#'+event.target.id+'toHide').hidden=true;
+       };
+    }
+     destroyTag(pr) {
+       Polymer.dom(this.root).querySelector('paper-button[id='+pr.target.id.replace("-clone",'')+']').hidden=false;
+      pr.target.remove();
+     }
+      _toggleGlycanFilter () {
+          this._setTogglesAndRSliders();
+          this.$.glycanFilterBox.toggle();
+          if(this.$.foldIcon.hasAttribute('disabled')){
+              this.$.expandIcon.setAttribute('disabled', 'true');
+              this.$.foldIcon.removeAttribute('disabled');
+          }else{
+              this.$.foldIcon.setAttribute('disabled', 'true');
+              this.$.expandIcon.removeAttribute('disabled');
+          }
+      }
+      _setTogglesAndRSliders () {
+          for (var idx in this.monosaccharides){
+              var monosaccharide = this.monosaccharides[idx];
+              Polymer.dom(this.root).querySelector("#"+monosaccharide+"RangeMin").value = 0;
+          }
+      }
+      _getCompoList () {
+        var compoRequest= {};
+        var compolist = Polymer.dom(this.root).querySelector("#compoCommaList").value
+        if(compolist != undefined){
+            compolist = compolist.replace(/[.'\/#!$%\^\\\^&\*;:{}=\-_`~()]/g,"").split(",");
+        }
+        if(compolist[0].includes("Hex") === false){
+         var parsedCompo= Polymer.dom(this.root).querySelector("#oxfordInput").translate(compolist);
+         }else{
+           var parsedCompo = this.parseCompo(compolist);
+        };
+       compoRequest['composition']=parsedCompo;
+       this.filterOutput = compoRequest;
+      }
+      parseCompo(listOfCompo){
+        var listOfFourteen = [];
+        for(var c =0; c<listOfCompo.length; c ++){
+          var mono = {'Hex': 0,'HexNAc': 0,'dHex': 0,'NeuAc': 0,'NeuGc': 0, 'Pen': 0, 'S': 0,'P': 0,'Kdn': 0,'Kdo': 0,'HexA': 0,'Met' : 0,'Ac' : 0,'Other':0};
+          var extracted = listOfCompo[c].trim().split(' ');
+          for(var b =0; b<extracted.length; b ++){
+            var remaining = '';
+            var quant = 0;
+            var regex = /[2-9]/;
+            var match = extracted[b].match(/\d+/g);
+            if(match != null){
+                var quantInd =  extracted[b].search(/\d/);
+                quant += parseInt(extracted[b].substring(quantInd));
+                remaining += extracted[b].substring(0, quantInd);
+            }else{
+              quant += 1;
+              remaining += extracted[b];
+            };
+            if (remaining==='HexNAc') {
+              mono['HexNAc'] += quant;
+            } else if (remaining==='Hex') {
+                  mono['Hex'] += quant; //Translating into integer and adding
+            }else if (remaining==='dHex') {
+                  mono['dHex'] += quant; //Translating into integer and adding
+            }else if (remaining==='NeuAc') {
+                  mono['NeuAc'] += quant; //Translating into integer and adding
+            } else if (remaining==='NeuGc') {
+                  mono['NeuGc'] += quant; //Translating into integer and adding
+            }else if (remaining==='Pen') {
+                  mono['Pen'] += quant; //Translating into integer and adding
+            }else if (remaining==='S') {
+                  mono['S'] += quant; //Translating into integer and adding
+            }else if (remaining==='P') {
+                  mono['P'] += quant; //Translating into integer and adding
+            }else if (remaining==='Kdn') {
+                  mono['Kdn'] += quant; //Translating into integer and adding
+            }else if (remaining==='Kdo') {
+                  mono['Kdo'] += quant; //Translating into integer and adding
+            }else if (remaining==='HexA') {
+                  mono['HexA'] += quant; //Translating into integer and adding
+            }else if (remaining==='Met' || remaining==='Methyl') {
+                  mono['Met'] += quant; //Translating into integer and adding
+            }else if (remaining==='Ac' || remaining==='Acetyl') {
+                  mono['Ac'] += quant; //Translating into integer and adding
+            }else if (remaining==='Other') {
+                  mono['Other'] += quant; //Translating into integer and adding
+            };
+          };
+          var monoMerge = '';
+          for(var key in mono){
+            if (mono.hasOwnProperty(key)) {
+                monoMerge += mono[key].toString();
+            };
+          };
+          listOfFourteen.push(monoMerge);
+        };
+        return listOfFourteen;
+      }
+      getAllCompo (){
+          var rangeBox = this.$.rangeBox;
+          var paperInputs = Array.prototype.slice.call(rangeBox.getElementsByTagName('paper-slider'));
+          var data = this;
+          var compoString = '';
+          var monosacDico = {};
+          paperInputs.forEach(function (item) {
+            // var edge = item.getAttribute('edge');
+            var monosaccharideId = item.id.replace("RangeMin","");
+            if (monosacDico.hasOwnProperty( monosaccharideId)){
+              monosacDico[monosaccharideId] += data.shadowRoot.querySelector("#"+monosaccharideId+"RangeMin").value;
+            }else{monosacDico[monosaccharideId]=''+data.shadowRoot.querySelector("#"+monosaccharideId+"RangeMin").value};
+          });
+          for (var key in monosacDico){
+            if (monosacDico.hasOwnProperty(key)){
+              compoString +=key+monosacDico[key]+' ';
+            };
+          };
+          return compoString;
+        }
+      _getCompo () {
+        if(Polymer.dom(this.root).querySelector("#compoFromSelectors").value==''){
+          var compoToParse = this.getAllCompo();
+          compoToParse = this.createStringCompo(compoToParse);
+        }else{
+          var compoToParse = Polymer.dom(this.root).querySelector("#compoFromSelectors").value;
+        };
+        var allCompo = compoToParse.split(', ');
+        allCompo.splice(-1,1);
+        var toVisualize = {};
+        toVisualize['composition'] = this.parseCompo(allCompo);
+        this.filterOutput = toVisualize;
+        console.log(this.filterOutput)
+      }
+      _addCompo(){
+        var compoToParse = this.getAllCompo();
+        var parsed = this.createStringCompo(compoToParse);
+        // var firstCompo=Polymer.dom(this.root).querySelector("#compoFromSelectors").value;
+        Polymer.dom(this.root).querySelector("#compoFromSelectors").value +=parsed;
+      }
+      createStringCompo(compoFromSlider){
+        var compoArray = compoFromSlider.split(' ')
+        compoArray.splice(-1,1);
+        var reWriteCompo = '';
+        for (var ca=0; ca < compoArray.length; ca +=1){
+            var itemMonosac = compoArray[ca];//+compoArray[ca+1];
+            var firstDigit = itemMonosac.search(/\d/);
+            var monos = itemMonosac.substring(0,firstDigit);
+            var numberOf = itemMonosac.substring(firstDigit);
+            if (numberOf === '0'){
+              continue;
+            }else if (numberOf === '1') {
+              reWriteCompo += monos + ' '
+            }else{reWriteCompo += monos+numberOf+ ' '}
+        };
+        return reWriteCompo.slice(0,-1)+', ';
+      }
+      resetSelector(){
+        var rangeBox = this.$.rangeBox;
+        var paperInputs = Array.prototype.slice.call(rangeBox.getElementsByTagName('paper-slider'));
+        var filterObject = {};
+        var data = this;
+        paperInputs.forEach(function (item) {
+            // var edge = item.getAttribute('edge');
+            var rangeObject = {};
+            var monosaccharideId = item.id.replace("RangeMin","");
+            rangeObject["minRange"] = 0;
+            rangeObject["presence"] = true;
+            filterObject[monosaccharideId] = rangeObject;
+            data.shadowRoot.querySelector("#"+monosaccharideId+"RangeMin").value = 0;
+        });
+        data.filter = filterObject;
+        var spareMonosac = ['S', 'P', 'Kdn', 'Kdo', 'HexA',  'Methyl', 'Acetyl', 'Other'];
+        for (var h = 0; h < spareMonosac.length; h++) {
+          Polymer.dom(this.root).querySelector('#'+spareMonosac[h]+'toHide').hidden=true;
+        };
+      }
+      _resetAll(){
+        this.resetSelector();
+        Polymer.dom(this.root).querySelector("#compoFromSelectors").value='';
+      }
+
+      param(propArray){
+        var myJson = {};
+        for (var i = 0; i < propArray.length; i++) {
+          var x = propArray[i].getAttribute("data-id");
+          var s = x.split("=");
+          if (s[0] in myJson) {
+            myJson[s[0]].push(s[1])
+          } else {
+            myJson[s[0]]=[s[1]];
+          }
+        }
+        return myJson;
+      }
+     idCreator(id) {
+       return "d_"+id.replace(/ /g,'').replace(/\(/g, '').replace(/\)/g, '').replace(/\,/g, "").replace("/","").replace(/\'/g,"");
+     }
+    }
+    window.customElements.define(GlyconnectFilter.is, GlyconnectFilter);
+    </script>
+</dom-module>

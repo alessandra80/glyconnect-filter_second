@@ -1,0 +1,26 @@
+{
+  "name": "glycosetta-stone",
+  "main": "glycosetta-stone.html",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^2.0.0"
+  },
+  "devDependencies": {
+    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^2.0.0",
+    "web-component-tester": "Polymer/web-component-tester#^6.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0"
+  },
+  "resolutions": {
+    "polymer": "^2.0.0"
+  },
+  "homepage": "https://github.com/universvm/glycosetta-JS",
+  "_release": "c95c34f09d",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "c95c34f09d423be02182b9815c6b9ae021965b6e"
+  },
+  "_source": "https://github.com/universvm/glycosetta-JS.git",
+  "_target": "*",
+  "_originalSource": "https://github.com/universvm/glycosetta-JS.git",
+  "_direct": true
+}

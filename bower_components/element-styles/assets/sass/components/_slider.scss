@@ -1,0 +1,25 @@
+.main-gallery {
+  height: 300px;
+  .gallery-cell {
+    height: 100%;
+    bottom: 0;
+    float: left;
+    width: 100%;
+    clear: none;
+    display: inline-block;
+    top: 0;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+
+  .flickity-page-dots{
+    bottom: 15px;
+
+    .dot{
+      background: white;
+    }
+  }
+
+}

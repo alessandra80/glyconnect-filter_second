@@ -1,0 +1,41 @@
+section.featured-pageblocks{
+  overflow: hidden;
+
+  a.link{
+    text-decoration: none;
+    color: $text-color;
+    @include span(3 of 12);
+
+    section.featured-pageblock{
+      padding: 25px;
+      background: $color1;
+      position: relative;
+
+      i.fa{
+        font-size: 75px;
+        color: $em-blue;
+        display: inline-block;
+        width: 100%;
+        text-align: center;
+        margin: 30px 0;
+      } 
+
+      p{
+        font-family: $raleway;
+        line-height: 150%;
+        font-weight: 300;
+        margin-bottom: 0;
+//        color: $text-color;
+      }
+    }
+    &:nth-child(4){
+      @include span(3 of 12 last);
+    }
+    &:hover{
+      section.featured-pageblock{
+        @include single-transition(all, 0.3s);
+        background: darken($color1, 10%);
+      }
+    }
+  }
+}

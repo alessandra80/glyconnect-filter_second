@@ -1,0 +1,29 @@
+{
+  "name": "element-styles",
+  "authors": [
+    "Elementmedia <info@elementmedia.nl>"
+  ],
+  "description": "Default SASS for elementhemes WP projects",
+  "main": "element-styles.scss",
+  "license": "MIT",
+  "homepage": "http://elementmedia.nl",
+  "private": false,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "version": "0.1.4",
+  "_release": "0.1.4",
+  "_resolution": {
+    "type": "version",
+    "tag": "0.1.4",
+    "commit": "cc802680ddae86fa871d1f4a1235244e96bce202"
+  },
+  "_source": "https://elementmedia@bitbucket.org/elementmedia/element-styles.git",
+  "_target": "^0.1.4",
+  "_originalSource": "element-styles",
+  "_direct": true
+}

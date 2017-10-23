@@ -1,0 +1,206 @@
+/* ----------------------------------------------------------------------------
+ * Structure
+ * ------------------------------------------------------------------------- */
+
+/* global box-sizing */
+*,
+*:after,
+*:before {
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+html, body {
+  background-color: $body-color;
+  font-family: $base_font;
+  font-size: $base_font_size;
+  font-weight: $base_font_weight;
+  color: $base_text_color;
+  line-height: $base_line_height;
+  margin: 0;
+  padding: 0;
+}
+
+.pagewrap {
+  // @include pie-clearfix();
+  // @include box-sizing();
+  box-sizing: border-box;
+  width:100%;
+  max-width: $max-page-width;
+  margin:auto;
+}
+
+/* clear */
+.clear:before,
+.clear:after {
+    content: ' ';
+    display: table;
+}
+
+.clear:after {
+    clear: both;
+}
+
+.clear {
+    *zoom: 1;
+}
+
+img {
+    max-width: 100%;
+    vertical-align: bottom;
+    height: auto;
+}
+
+a {
+  //    text-decoration:underline;
+  color:$link_color;
+  text-decoration:none;
+  &:after{
+    content: "";
+    border-bottom: 1px solid $color1;
+    top: 100%;
+    left: 0;
+    right: 0;
+  }
+  &:hover, &:focus, &:active {
+    text-decoration:none;
+    color:$link_hover_color;
+  }
+}
+
+input:focus {
+    outline: 0;
+    border: 1px solid $color2;
+}
+
+ol, ul {
+
+}
+
+select{
+    width: 100%;
+}
+
+form {
+  margin:0;
+  input, textarea, select {
+    border:1px solid #ccc;
+    width:100%;
+    box-sizing: border-box;
+    padding: $input_padding;
+    margin:5px 0;
+    color: $input_text_color;
+
+    // @include border-radius($input_border_radius);
+    // @include box-sizing();
+    box-sizing: border-box;
+    // @include input-placeholder {
+    //   color:$placeholder_color;
+    // }
+  }
+
+  input[type=checkbox] {
+    width:auto;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  label {
+    margin:0;
+    padding: 5px 0;
+    display: inline-block;
+    clear: both;
+    vertical-align: middle;
+  }
+
+  textarea {
+    height:100px;
+    // @include input-placeholder {
+    //   color: #999;
+    // }
+  }
+
+  .error {
+    span {display: block; padding: 5px; color: #ff0000;}
+    input, select, textarea{
+      border-color:#ff0000;
+    }
+  }
+
+//  @include pie-clearfix();
+}
+
+.button, button, input[type="submit"], .btn {
+  display: inline-block;
+  position:relative;
+  background: $button_bg_color;
+  padding:$button_padding;
+  min-width:auto;
+  color:$button_text_color;
+  font-weight:$button_font_weight;
+  font-size: $button_font_size;
+  font-family: $button_font;
+  border:$button_border_width solid white;
+  // @include single-transition(all, 0.2s);
+  // @include border-radius($button_border_radius);
+  cursor: pointer;
+  outline: 0;
+  text-align: center;
+  text-decoration:none;
+	line-height: $button_line_height;
+
+  &:hover{
+    background: $button_hover_bg_color;
+    border-color: darken($button_hover_bg_color, 5%);
+    color:$button_hover_text_color;
+    a{
+      color: $button_hover_text_color;
+    }
+  }
+
+  a {
+    position: relative;
+    display:inline-block;
+    margin:-15px -30px;
+    padding:15px 30px;
+    color:#fff;
+    text-decoration:none;
+    // @include single-transition(all, 0.2s);
+    img{
+      vertical-align: middle;
+    }
+  }
+
+  img {
+    display: inline-block;
+    vertical-align: middle;
+    border:none;
+  }
+
+
+
+  &.full-width {
+    display:block;
+    width:100%;
+    box-sizing: border-box;
+  }
+
+  &.medium {
+    display:inline-block;
+    min-width:0;
+    padding:5px 12px;
+    margin:5px 10px;
+    border:2px solid #fff;
+  }
+
+  &.bg-color-1:hover {
+    background: $color1 !important;
+  }
+
+  &.bg-color-3:hover {
+    background: $color3 !important;
+  }
+}

@@ -1,0 +1,203 @@
+<link rel="import" href="../polymer/polymer-element.html">
+
+<dom-module id="glycosetta-linktype">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      .glycanFilterHeader {
+          font-size: 16px;
+          font-weight: 500;
+          line-height: 25px;
+      }
+      paper-button.indigo {
+          background-color: var(--paper-indigo-500);
+          color: white;
+          --paper-button-raised-keyboard-focus: {
+              color: white !important;
+          };
+      }
+      paper-button.filterToggleButton {
+          width: 100%;
+      }
+    </style>
+    <!-- <app-header-layout mode="seamed">
+        <div class="glycanFilterHeader">
+            <paper-button class="indigo filterToggleButton" on-click="_toggleNGlycan" toggles raised>
+                <iron-icon id="expandIcon" icon="icons:chevron-right" alt="unfold" ></iron-icon>
+                <iron-icon id="foldIcon" icon="icons:expand-more" alt="fold" disabled></iron-icon>
+                N-linked glycans
+            </paper-button>
+        </div>
+    </app-header-layout> -->
+    <iron-collapse id="glycanFilterN" class="horizontal center-justified">
+        <div class="layout horizontal flex" >
+          <div class="layout materialCard flex">
+                <app-toolbar>
+                    <paper-icon-button disabled style="color: white" icon="icons:view-list"></paper-icon-button>
+                    <span class="title">[[glycanType]]-Glycan</span>
+                </app-toolbar>
+                <div id="selectedN" class="enzymeSelected">
+                 </div>
+                <div class="horizontal end-justified layout">
+                    <paper-button class="indigo updateButton" on-tap="selectedPropN">Search</paper-button>
+                    <paper-button typeLink="N" class="indigo updateButton" on-tap="clearFilter">Clear</paper-button>
+                </div>
+          </div>
+        </div>
+          <div class="layout vertical flex">
+           <paper-tabs selected="{{selected}}" no-bar>
+               <paper-tab>Cores</paper-tab>
+               <paper-tab>Structural properties</paper-tab>
+               <paper-tab>Determinants</paper-tab>
+           </paper-tabs>
+           <iron-pages selected="{{selected}}">
+              <div class="layout materialCard flex">
+                   <template is="dom-repeat" items="{{coreTypeN}}">
+                        <paper-button typeLink="N" id={{item.name}}N raised data-id$="{{item.class}}={{item.name}}" coreTypeN="{{item}}" class="card" style$="background-color:{{item.color}}" on-tap="createTag">{{item.name}}</paper-button>
+                   </template>
+               </div>
+               <div class="layout materialCard flex">
+                   <template is="dom-repeat" items="{{propN}}">
+                       <paper-button typeLink="N" id="{{item.name}}N" raised data-id$="{{item.class}}={{item.name}}" propN="{{item}}" class="card" style$="background-color:{{item.color}}" on-tap="createTag">{{item.name}}</paper-button>
+                   </template>
+               </div>
+               <div class="layout materialCard flex"><link rel="import" href="../iron-list/iron-list.html">
+                   <template is="dom-repeat" items="{{detN}}">
+                       <paper-button typeLink="N" id="{{idCreator(item.name)}}N" raised data-id$="{{item.class}}={{item.name}}" detN="{{item}}" class="card" style$="background-color:{{item.color}}" on-tap="createTag">{{item.name}}</paper-button>
+                   </template>
+               </div>
+           </iron-pages>
+         </div>
+    </iron-collapse>
+    <br><br>
+    <!-- <app-header-layout mode="seamed">
+        <div class="glycanFilterHeader">
+            <paper-button class="indigo filterToggleButton" on-click="_toggleOGlycan" toggles raised>
+                <iron-icon id="expandIcon" icon="icons:chevron-right" alt="unfold" ></iron-icon>
+                <iron-icon id="foldIcon" icon="icons:expand-more" alt="fold" disabled></iron-icon>
+                O-linked glycans
+            </paper-button>
+        </div>
+    </app-header-layout>
+    <iron-collapse id="glycanFilterO" class="horizontal center-justified">
+        <div class="layout horizontal flex" >
+            <div class="layout materialCard flex">
+                <app-toolbar>
+                    <paper-icon-button disabled style="color: white" icon="icons:view-list"></paper-icon-button>
+                    <span class="title">O-Glycan</span>
+                </app-toolbar>
+                <div id="selectedO" class="enzymeSelected">
+                 </div>
+                <div class="horizontal end-justified layout">
+                  <paper-button class="indigo updateButton" on-tap="selectedPropO">Search</paper-button>
+                  <paper-button typeLink="O" class="indigo updateButton" on-tap="clearFilter">Clear</paper-button>
+                </div>
+            </div>
+        </div>
+        <div class="layout vertical flex">
+         <paper-tabs selected="{{selected}}"  no-bar>
+             <paper-tab>Cores</paper-tab>
+             <paper-tab>Structural properties</paper-tab>
+             <paper-tab>Determinants</paper-tab>
+         </paper-tabs>
+         <iron-pages selected="{{selected}}">
+            <div class="layout materialCard flex">
+                <template is="dom-repeat" items="{{coreTypeO}}">
+                    <paper-button typeLink="O" raised id={{idCreator(item.name)}}O data-id$="{{item.class}}={{item.name}}" coreTypeO="{{item}}" class="card" style$="background-color:{{item.color}}" on-tap="createTag">{{item.name}} </paper-button>
+                </template>
+            </div>
+            <div class="layout materialCard flex">
+                <template is="dom-repeat" items="{{propO}}">
+                    <paper-button typeLink="O" raised id={{item.name}}O data-id$="{{item.class}}={{item.name}}" propO="{{item}}" class="card" style$="background-color:{{item.color}}" on-tap="createTag">{{item.name}}</paper-button>
+                </template>
+            </div>
+            <div class="layout materialCard flex">
+                <template is="dom-repeat" items="{{detO}}">
+                    <paper-button typeLink="O" raised id={{idCreator(item.name)}}O data-id$="{{item.class}}={{item.name}}" detO="{{item}}" class="card" style$="background-color:{{item.color}}" on-tap="createTag">{{item.name}}</paper-button>
+                </template>
+            </div>
+          </iron-pages>
+        </div>
+    </iron-collapse>
+    <br><br>
+    <app-header-layout mode="seamed">
+        <div class="glycanFilterHeader">
+            <paper-button class="indigo filterToggleButton" on-click="_toggleNOGlycan" toggles raised>
+                <iron-icon id="expandIcon" icon="icons:chevron-right" alt="unfold" ></iron-icon>
+                <iron-icon id="foldIcon" icon="icons:expand-more" alt="fold" disabled></iron-icon>
+                Non-attached to proteins
+            </paper-button>
+        </div>
+    </app-header-layout>
+    <iron-collapse id="glycanFilterNO" class="horizontal center-justified">
+        <div class="layout horizontal flex" >
+            <div class="layout materialCard flex">
+                <app-toolbar>
+                    <paper-icon-button disabled style="color: white" icon="icons:view-list"></paper-icon-button>
+                    <span class="title"> Non-attached to proteins</span>
+                </app-toolbar>
+                <div id="selectedNP" class="enzymeSelected">
+                 </div>
+                <div class="horizontal end-justified layout">
+                  <paper-button class="indigo updateButton" on-tap="selectedPropNP">Search</paper-button>
+                  <paper-button typeLink="NP" class="indigo updateButton" on-tap="clearFilter">Clear</paper-button>
+                </div>
+            </div>
+        </div>
+        <div class="layout vertical flex">
+         <paper-tabs selected="{{selected}}"  no-bar>
+             <paper-tab>Cores</paper-tab>
+             <paper-tab>Structural properties</paper-tab>
+             <paper-tab>Determinants</paper-tab>
+         </paper-tabs>
+         <iron-pages selected="{{selected}}">
+            <div class="layout materialCard flex">
+                <template is="dom-repeat" items="{{coreTypeNP}}">
+                    <paper-button typeLink="NP" raised id={{item.name}}NP data-id$="{{item.class}}={{item.name}}" coreTypeNP="{{item}}" class="card" style$="background-color:{{item.color}}" on-tap="createTag">{{item.name}} </paper-button>
+                </template>
+            </div>
+            <div class="layout materialCard flex">
+                <template is="dom-repeat" items="{{propNP}}">
+                    <paper-button typeLink="NP" raised id={{item.name}}NP data-id$="{{item.class}}={{item.name}}" propNP="{{item}}" class="card" style$="background-color:{{item.color}}" on-tap="createTag">{{item.name}}</paper-button>
+                </template>
+            </div>
+            <div class="layout materialCard flex">
+                <template is="dom-repeat" items="{{detNP}}">
+                    <paper-button typeLink="NP" raised id={{idCreator(item.name)}}NP data-id$="{{item.class}}={{item.name}}" detO="{{item}}" class="card" style$="background-color:{{item.color}}" on-tap="createTag">{{item.name}}</paper-button>
+                </template>
+            </div>
+          </iron-pages>
+        </div>
+    </iron-collapse> -->
+</template>
+<script>
+  /**
+   * `glycosetta-stone`
+   *
+   *
+   * @customElement
+   * @polymer
+   * @demo demo/index.html
+   */
+  class GlycosettaStone extends Polymer.Element {
+    static get is() { return 'glycosetta-stone'; }
+    static get properties() {
+      return {
+        glycanType: {
+            type: String,
+            reflectToAttribute: true,
+            observer: '_loadTabs'
+        },
+        properties: {
+            reflectToAttribute: true,
+            type: Array,
+        }
+      };
+    }
+
+  }
+  window.customElements.define(GlycosettaStone.is, GlycosettaStone);
+</script>
+</dom-module>

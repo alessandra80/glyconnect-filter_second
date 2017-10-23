@@ -1,0 +1,18 @@
+{
+  "name": "element-styles",
+  "authors": [
+    "Elementmedia <info@elementmedia.nl>"
+  ],
+  "description": "Default SASS for elementhemes WP projects",
+  "main": "element-styles.scss",
+  "license": "MIT",
+  "homepage": "http://elementmedia.nl",
+  "private": false,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}  

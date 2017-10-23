@@ -1,0 +1,128 @@
+<link rel="import" href="../polymer/polymer-element.html">
+
+<dom-module id="glycosetta-stone">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <!-- <h2>Hello [[prop1]]!</h2> -->
+  </template>
+
+  <script>
+    /**
+     * `glycosetta-stone`
+     *
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class GlycosettaStone extends Polymer.Element {
+      static get is() { return 'glycosetta-stone'; }
+      static get properties() {
+        return {
+          // prop1: {
+          //     type: String,
+          //     value: 'glycosetta-js',
+          //     observer: '_translate'
+          // },
+          inputValue: {
+              reflectToAttribute: true,
+              type: Array,
+              observer: '_translate'
+          }
+        };
+      }
+        _translate() {
+            // var this.inputValue = "A2G2S2 (34%)", //TODO: Change the inside with an event listener?
+                var translated2 = [];
+                //first two are part of the core
+            // if else to retrieve percentages:
+            console.log(this.inputValue);
+            for (var el in this.inputValue){
+              var hex = 3;//Hexose
+              var hexnac = 2; //Hexnac
+              var deHex = 0; //Deoxyhexose
+              var neuac = 0; //NeuAC
+              var e = this.inputValue[el];
+              var translated = "";
+              if (e.includes("(") === true) { //if it contains a percentage
+                  var splitCap = e.split(/(?=[A-Z ])/); //Split should occur by capital letter and space
+              } else {
+                  var splitCap = e.split(/(?=[A-Z])/); //else no percentage available so splitting only occurs by Capitals
+              }
+              for (var i = 0; i < splitCap.length; i++) {
+                  var index = splitCap[i].indexOf('[');
+                  if(index != -1){
+                    splitCap[i]=splitCap[i].slice(0,index);
+                  };
+                  if (splitCap[i].includes("A") === true) {
+                      hexnac += this.howMany(splitCap[i], "A"); //Translating into integer and adding
+
+                      // add conditions for "-"
+                  } else if (splitCap[i].includes("B") === true) {
+                      hexnac += this.howMany(splitCap[i], "B"); //Translating into integer and adding
+
+                  } else if (splitCap[i].includes("F") === true || splitCap[i].includes("Fa") === true) {
+                      deHex += this.howMany(splitCap[i], "F"); //Translating into integer and adding
+
+                  } else if (splitCap[i].includes("G") === true) {
+                      hex += this.howMany(splitCap[i], "G"); //Translating into integer and adding
+
+                  } else if (splitCap[i].includes("S") === true) {
+                      neuac += this.howMany(splitCap[i], "S"); //Translating into integer and adding
+                  } else if (splitCap[i].includes("L") === true) {
+                      neuac += this.howMany(splitCap[i], "L"); //Translating into integer and adding
+                  } else if (splitCap[i].includes("E") === true) {
+                      neuac += this.howMany(splitCap[i], "E"); //Translating into integer and adding
+                  } else if (splitCap[i].includes("H") === true) {
+                      if (splitCap[i] === "Hy") {
+                        hex = 5;
+                        hexnac = 3;
+                      }
+                  } else if (splitCap[i].includes("C") === true) {
+                      hex = 3;
+                      hexnac = 4;
+                  } else if (splitCap[i].includes("M") === true) {
+                      if (e.includes("Man") === true) { //TODO: This does NOT take into account ManX-Y (ranges)
+                          if (e.includes("-") === true) { //if it is a range
+                              var range = e.replace("Man", "");
+                              var range = range.split("-");
+                              // TODO: what do we do with ranges?
+                          } else { //No range = party
+                              hex += parseInt(e.replace("Man", "")) - 3; //removing 3 as they already in the core
+                          }
+                      } else { //else it's just M
+                          if (e.includes("-") === true) { //if it is a range
+                              var range = e.replace("M", "");
+                              var range = range.split("-");
+                              // TODO: what do we do with ranges?
+                          } else { //No range = party
+                              hex += this.howMany(splitCap[i], "M") - 3; //removing 3 as they already in the core
+                          }
+                      }
+                  }
+              }
+              translated = '' + hex + hexnac + deHex + neuac + "0000000000";
+              translated2.push(translated)
+            }
+            // merging into translated
+            //TODO: Above 9 shall we fix it here?
+            console.log(translated2);
+        }
+        howMany(typeMono, acronym){
+          if (typeMono.includes('a')){
+            typeMono = typeMono[0]+typeMono.substr(2);
+          }
+          var howmany = typeMono.replace(acronym, "");
+          if(howmany==''){
+            howmany = '1';
+          };
+          return parseInt(howmany)
+        }
+    }
+    window.customElements.define(GlycosettaStone.is, GlycosettaStone);
+  </script>
+</dom-module>
